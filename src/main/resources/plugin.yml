@@ -1,0 +1,16 @@
+name: RacketSlime
+version: ${project.version}
+main: racketslime.deadpanda.Main
+api-version: 1.16
+author: ADeadPanda
+description: A scoccer like mini game
+
+commands:
+  arena:
+  lobby:
+  game:
+  set:
+  ball:
+  orange:
+  blue:
+  rematch:
