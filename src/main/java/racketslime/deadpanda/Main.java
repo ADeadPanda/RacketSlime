@@ -72,6 +72,8 @@ public final class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         getServer().getConsoleSender().sendMessage(color.Set("&aRacketSlime has been&c disabled"));
+        gameManager.resetGame();
+        gameManager.cleanUpBall();
     }
 
     private void loadConfig() {

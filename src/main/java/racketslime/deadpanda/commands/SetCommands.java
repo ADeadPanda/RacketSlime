@@ -17,9 +17,9 @@ public class SetCommands implements CommandExecutor {
             Player player = (Player) sender;
             if (player.hasPermission("RacketSlime.set.GameTimer")) {
                 if (args.length == 2) {
-                    if (args[0].equalsIgnoreCase("GameTimer")) {
+                    if (args[0].equalsIgnoreCase("GameTime")) {
                         plugin.getConfig().set("GameTime", Integer.parseInt(args[1]));
-                        player.sendMessage(color.Set("&aGame timer set."));
+                        player.sendMessage(color.Set("&aGame time set."));
                     }
                 } else {
                     player.sendMessage(color.Set("&cNot enough arguments."));

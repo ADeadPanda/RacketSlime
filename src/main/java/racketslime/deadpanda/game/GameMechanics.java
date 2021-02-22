@@ -1,10 +1,7 @@
 package racketslime.deadpanda.game;
 
 import net.minecraft.server.v1_16_R3.WorldServer;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.entity.Entity;
@@ -14,7 +11,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import racketslime.deadpanda.Main;
 import racketslime.deadpanda.mobs.SlimeBall;
@@ -33,6 +32,7 @@ public class GameMechanics implements Listener {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
         if (!plugin.gameManager.isStarted()) {
+            plugin.gameManager.cleanUpBall();
             if (plugin.playersInTeamOrange.size() < plugin.gameManager.playerNeeded / 2) {
                 plugin.playersInTeamOrange.add(player);
                 player.setDisplayName(player.getName());
@@ -49,25 +49,6 @@ public class GameMechanics implements Listener {
             plugin.playerManager.put(uuid, new PlayerManager(uuid, false, 0));
             plugin.playersInGame.add(uuid);
             plugin.gameManager.lobbyWait(player);
-            Bukkit.getOnlinePlayers().forEach(online -> {
-                plugin.playerScoreboard.scoreLobby(online);
-                if (!plugin.playersInTeamBlue.contains(online) || !plugin.playersInTeamOrange.contains(online)) {
-                    if (plugin.playersInTeamOrange.size() < plugin.gameManager.playerNeeded / 2) {
-                        plugin.playersInTeamOrange.add(online);
-                        online.setDisplayName(online.getName());
-                        Bukkit.broadcastMessage(color.Set("&6" + online.getDisplayName() + "&f has joined team &6Orange!"));
-                        online.setDisplayName(color.Set("&6" + online.getDisplayName() + "&f"));
-                        online.setPlayerListName(color.Set("&6" + online.getDisplayName()));
-                    } else if (plugin.playersInTeamBlue.size() < plugin.gameManager.playerNeeded / 2) {
-                        plugin.playersInTeamBlue.add(online);
-                        online.setDisplayName(online.getName());
-                        Bukkit.broadcastMessage(color.Set("&9" + online.getDisplayName() + "&f has joined team &9Blue!"));
-                        online.setDisplayName(color.Set("&9" + online.getDisplayName() + "&f"));
-                        online.setPlayerListName(color.Set("&9" + online.getDisplayName()));
-                    }
-                }
-            });
-
             if (plugin.gameManager.lobbySpawn != null) {
                 player.teleport(plugin.gameManager.lobbySpawn);
             }
@@ -86,8 +67,6 @@ public class GameMechanics implements Listener {
             plugin.playersInGame.remove(uuid);
             plugin.playersInTeamBlue.remove(player);
             plugin.playersInTeamOrange.remove(player);
-            plugin.gameManager.gameStop();
-
         }
 
         Bukkit.getOnlinePlayers().forEach(online -> {
@@ -139,6 +118,10 @@ public class GameMechanics implements Listener {
                 }
             }
         }
+    }
+    @EventHandler
+    public void onHunger(PlayerMoveEvent event){
+        event.getPlayer().setSaturation(20);
     }
 
     public void onSpawnBall(Location location) {

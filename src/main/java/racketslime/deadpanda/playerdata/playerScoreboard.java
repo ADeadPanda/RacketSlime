@@ -32,17 +32,15 @@ public class playerScoreboard {
             time = o.getScore(color.Set("&fTime: &a" + plugin.gameManager.gameTime));
             time.setScore(4);
         }
-        gameMode = o.getScore(color.Set("&fGame: &aRacketSlime"));
-        gameMode.setScore(3);
 
         score = o.getScore(color.Set("&6Orange Score: &f" + plugin.gameManager.orangeScore));
-        score.setScore(2);
+        score.setScore(3);
 
         score = o.getScore(color.Set("&9Blue Score: &f" + plugin.gameManager.blueScore));
-        score.setScore(1);
+        score.setScore(2);
 
         score = o.getScore(color.Set("&7Max Score: &f" + plugin.gameManager.maxScore));
-        score.setScore(0);
+        score.setScore(1);
 
         player.setScoreboard(b);
     }

@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.DisplaySlot;
 import racketslime.deadpanda.Main;
@@ -32,8 +33,8 @@ public class GameManager implements Listener {
     private Main plugin = Main.getInstance();
 
     public void setupGame() {
-        if (plugin.getConfig().contains("GameTimer")) {
-            gameTime = plugin.getConfig().getInt("GameTimer");
+        if (plugin.getConfig().contains("GameTime")) {
+            gameTime = plugin.getConfig().getInt("GameTime");
             plugin.getServer().getConsoleSender().sendMessage(color.Set("&7GameTimer Found"));
         }
         if (plugin.getConfig().contains("Score")) {
@@ -89,11 +90,10 @@ public class GameManager implements Listener {
 
     public void gameStart() {
         isStarted = true;
+        gameCountDown();
         plugin.gameMechanics.onSpawnBall(ballSpawn);
         Bukkit.getOnlinePlayers().forEach(player -> {
-            plugin.playerScoreboard.scoreGame(player);
             player.setGameMode(GameMode.ADVENTURE);
-            gameCountDown(player);
             player.setWalkSpeed(.5f);
             player.getInventory().clear();
             player.setInvulnerable(true);
@@ -108,38 +108,49 @@ public class GameManager implements Listener {
     }
 
     public void gameStop() {
+        if (blueScore > orangeScore) {
+            Bukkit.broadcastMessage(color.Set("&fThe winner is: &9Blue &fteam!"));
+        }
+        if (orangeScore > blueScore) {
+            Bukkit.broadcastMessage(color.Set("&fThe winner is: &6Orange &fteam!"));
+        }
+        Bukkit.broadcastMessage(color.Set("&aGood Game!"));
+        Bukkit.broadcastMessage(color.Set("&7The score was &f" + orangeScore + " &6Orange&7 and&f " + blueScore + " &9Blue&7!"));
+        cleanUpBall();
+        isStarted = false;
         Bukkit.getOnlinePlayers().forEach(online -> {
-            online.getLocation().getWorld().getNearbyEntities(ballSpawn, 100, 100, 100).forEach(entity -> {
-                if (entity.getName().contains("SlimeBall")) {
-                    entity.remove();
-                    entity.isDead();
-                }
-            });
             online.setWalkSpeed(.2f);
             online.getScoreboard().clearSlot(DisplaySlot.SIDEBAR);
             online.getInventory().clear();
             online.setInvulnerable(false);
             online.setGameMode(GameMode.ADVENTURE);
-            plugin.playersInGame.clear();
+/*            plugin.playersInGame.clear();
             plugin.playersInTeamOrange.clear();
             plugin.playersInTeamBlue.clear();
             plugin.playerManager.clear();
             online.setPlayerListName(color.Set("&f" + online.getName()));
-            online.setDisplayName(color.Set("&f" + online.getName()));
+            online.setDisplayName(color.Set("&f" + online.getName()));*/
             if (lobbySpawn != null) {
                 online.teleport(lobbySpawn);
             }
         });
-        if (blueScore == maxScore) {
-            Bukkit.broadcastMessage(color.Set("&fThe winner is: &9Blue &fteam!"));
-        }
-        if (orangeScore == maxScore) {
-            Bukkit.broadcastMessage(color.Set("&fThe winner is: &6Orange &fteam!"));
-        }
-        Bukkit.broadcastMessage(color.Set("&aGood Game!"));
-        Bukkit.broadcastMessage(color.Set("&7The score was &f" + orangeScore + " &6Orange&7 and&f " + blueScore + " &9Blue&7!"));
+    }
+
+    public void resetGame(){
+        gameTime = plugin.getConfig().getInt("GameTime");
+        lobbyCountdown = plugin.getConfig().getInt("LobbyCountDown");
+        orangeScore = 0;
+        blueScore = 0;
+    }
 
 
+    public void cleanUpBall() {
+        Bukkit.getOnlinePlayers().forEach(online -> online.getLocation().getWorld().getEntities().forEach(entity -> {
+            if (entity.getName().contains("SlimeBall")) {
+                entity.remove();
+                entity.isDead();
+            }
+        }));
     }
 
 
@@ -183,16 +194,18 @@ public class GameManager implements Listener {
         }.runTaskTimer(plugin, 0, 20);
     }
 
-    public void gameCountDown(Player player) {
+    public void gameCountDown() {
         new BukkitRunnable() {
             @Override
             public void run() {
                 if (gameTime > 0) {
-                    gameTime--;
+                    Bukkit.getOnlinePlayers().forEach(player -> {
                     plugin.playerScoreboard.scoreGame(player);
-                } else if (plugin.playersInGame.size() == playerNeeded) {
-                    gameStop();
+                    });
+                    gameTime--;
+                } else {
                     this.cancel();
+                    gameStop();
                 }
             }
         }.runTaskTimer(plugin, 0, 20);
