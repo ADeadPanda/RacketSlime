@@ -124,15 +124,7 @@ public class GameManager implements Listener {
             online.getInventory().clear();
             online.setInvulnerable(false);
             online.setGameMode(GameMode.ADVENTURE);
-/*            plugin.playersInGame.clear();
-            plugin.playersInTeamOrange.clear();
-            plugin.playersInTeamBlue.clear();
-            plugin.playerManager.clear();
-            online.setPlayerListName(color.Set("&f" + online.getName()));
-            online.setDisplayName(color.Set("&f" + online.getName()));*/
-            if (lobbySpawn != null) {
-                online.teleport(lobbySpawn);
-            }
+            online.teleport(lobbySpawn);
         });
     }
 
@@ -206,6 +198,9 @@ public class GameManager implements Listener {
                 } else {
                     this.cancel();
                     gameStop();
+                    Bukkit.getOnlinePlayers().forEach(player -> {
+                        player.teleport(lobbySpawn);
+                    });
                 }
             }
         }.runTaskTimer(plugin, 0, 20);
@@ -222,7 +217,8 @@ public class GameManager implements Listener {
 
     public int setOrangeScore() {
         orangeScore++;
-        if (orangeScore == maxScore) {
+        if (orangeScore >= maxScore) {
+            gameTime = 0;
             gameStop();
         }
         return orangeScore;
@@ -230,7 +226,8 @@ public class GameManager implements Listener {
 
     public int setBlueScore() {
         blueScore++;
-        if (blueScore == maxScore) {
+        if (blueScore >= maxScore) {
+            gameTime = 0;
             gameStop();
         }
         return blueScore;

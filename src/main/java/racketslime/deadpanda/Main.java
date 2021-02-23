@@ -74,6 +74,7 @@ public final class Main extends JavaPlugin {
         getServer().getConsoleSender().sendMessage(color.Set("&aRacketSlime has been&c disabled"));
         gameManager.resetGame();
         gameManager.cleanUpBall();
+        Bukkit.getOnlinePlayers().forEach(player -> player.getInventory().clear());
     }
 
     private void loadConfig() {

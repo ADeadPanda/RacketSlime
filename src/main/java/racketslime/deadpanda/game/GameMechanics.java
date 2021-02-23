@@ -10,12 +10,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.server.ServerListPingEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 import racketslime.deadpanda.Main;
+import racketslime.deadpanda.items.ItemManager;
 import racketslime.deadpanda.mobs.SlimeBall;
 import racketslime.deadpanda.playerdata.PlayerManager;
 import racketslime.deadpanda.utils.color;
@@ -119,9 +123,22 @@ public class GameMechanics implements Listener {
             }
         }
     }
+
     @EventHandler
-    public void onHunger(PlayerMoveEvent event){
+    public void onHunger(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
         event.getPlayer().setSaturation(20);
+        if (event.getPlayer().getInventory().getItemInMainHand().equals(ItemManager.pole)){
+            PotionEffect potionEffect = new PotionEffect(PotionEffectType.JUMP, 10, 2, false, false, false);
+            player.addPotionEffect(potionEffect);
+        }
+    }
+
+    @EventHandler
+    public void fish(PlayerFishEvent event){
+        if(event.getPlayer().getInventory().getItemInMainHand().equals(ItemManager.pole)){
+            event.getCaught().setVelocity(new Vector(0,0.5,0));
+        }
     }
 
     public void onSpawnBall(Location location) {
